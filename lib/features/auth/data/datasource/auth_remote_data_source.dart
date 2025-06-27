@@ -1,19 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_blog_app/core/constants/user_constants.dart';
+import 'package:flutter_blog_app/core/common/constants/user_constants.dart';
 import 'package:flutter_blog_app/core/error/exceptions.dart';
 import 'package:flutter_blog_app/core/utils/time_service.dart';
-import 'package:flutter_blog_app/features/auth/data/models/user_model.dart';
-import 'package:flutter_blog_app/init_dependencies.dart';
+import 'package:flutter_blog_app/features/auth/data/models/user/user_model.dart';
 
 abstract interface class IAuthRemoteDataSource {
-  Future<String> signUpWithEmailPassword({
+  Future<UserModel> signUpWithEmailPassword({
     required String name,
     required String email,
     required String password,
   });
 
-  Future<String> loginWithEmailPassword({
+  Future<UserModel> loginWithEmailPassword({
     required String email,
     required String password,
   });
@@ -31,16 +30,39 @@ class AuthRemoteDataSource implements IAuthRemoteDataSource {
   );
 
   @override
-  Future<String> loginWithEmailPassword({
+  Future<UserModel> loginWithEmailPassword({
     required String email,
     required String password,
-  }) {
-    // TODO: implement loginWithEmailPassword
-    throw UnimplementedError();
+  }) async {
+    try {
+      final userCredentials = await _firebaseAuth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      if (userCredentials.user == null) {
+        throw const ServerException("User is null !");
+      }
+
+      final userDetails = await _firebaseFirestore
+          .collection(UserConstants.userTableName)
+          .doc(userCredentials.user?.uid)
+          .get();
+
+      if (!userDetails.exists) {
+        throw const ServerException("User Data Not Found !");
+      }
+      var userDataModel = UserModel.fromJson(userDetails.data()!);
+      print(userDataModel);
+      return userDataModel;
+    } on FirebaseAuthException catch (e) {
+      throw ServerException("Firebase Error : ${e.toString()}");
+    } catch (e) {
+      throw ServerException("Server Error: ${e.toString()}");
+    }
   }
 
   @override
-  Future<String> signUpWithEmailPassword({
+  Future<UserModel> signUpWithEmailPassword({
     required String name,
     required String email,
     required String password,
@@ -67,7 +89,7 @@ class AuthRemoteDataSource implements IAuthRemoteDataSource {
           .doc(userCredentials.user!.uid)
           .set(userModel.toJson());
 
-      return userCredentials.user?.uid ?? '';
+      return userModel;
     } on FirebaseAuthException catch (e) {
       throw ServerException("Firebase Error : ${e.toString()}");
     } catch (e) {
