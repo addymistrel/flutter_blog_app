@@ -1,7 +1,7 @@
 import 'package:flutter_blog_app/core/error/failure.dart';
 import 'package:flutter_blog_app/core/usecase/usecase.dart';
 import 'package:flutter_blog_app/features/auth/domain/repositories/i_auth_repository.dart';
-import 'package:fpdart/src/either.dart';
+import 'package:fpdart/fpdart.dart';
 
 class UserSignUp implements Usecase<String, UserSignUpParams> {
   final IAuthRepository authRepository;

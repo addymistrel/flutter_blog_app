@@ -1,13 +1,19 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_blog_app/core/theme/app_theme.dart';
-import 'package:flutter_blog_app/firebase_options.dart';
+import 'package:flutter_blog_app/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:flutter_blog_app/init_dependencies.dart';
 import "package:flutter_blog_app/routes/app_router.dart";
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(const MyApp());
+  await initDependencies();
+  runApp(
+    MultiBlocProvider(
+      providers: [BlocProvider(create: (_) => serviceLocator<AuthBloc>())],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
