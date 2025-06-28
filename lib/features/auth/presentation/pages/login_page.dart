@@ -6,11 +6,15 @@ import 'package:flutter_blog_app/core/common/widgets/loader.dart';
 import 'package:flutter_blog_app/core/theme/app_pallete.dart';
 import 'package:flutter_blog_app/core/utils/show_snackbar.dart';
 import 'package:flutter_blog_app/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:flutter_blog_app/features/auth/presentation/pages/signup_page.dart';
 import 'package:flutter_blog_app/features/auth/presentation/widgets/auth_field.dart';
 import 'package:flutter_blog_app/features/auth/presentation/widgets/auth_gradient_button.dart';
+import 'package:flutter_blog_app/routes/settings/page_routes.dart';
 import 'package:go_router/go_router.dart';
 
 class LoginPage extends StatefulWidget {
+  static route(BuildContext context) => context.push(LoginPageRoute().path);
+
   const LoginPage({super.key});
 
   @override
@@ -43,15 +47,6 @@ class _LoginPageState extends State<LoginPage> {
                 StateConstants.failure,
                 state.message,
                 ContentType.failure,
-              );
-            }
-
-            if (state is AuthSuccess) {
-              showSnackbar(
-                context,
-                StateConstants.success,
-                state.successMessage,
-                ContentType.success,
               );
             }
           },
@@ -93,9 +88,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   const SizedBox(height: 20),
                   GestureDetector(
-                    onTap: () {
-                      context.push("/signup");
-                    },
+                    onTap: () => SignupPage.route(context),
                     child: RichText(
                       text: TextSpan(
                         text: "Don't have an account? ",

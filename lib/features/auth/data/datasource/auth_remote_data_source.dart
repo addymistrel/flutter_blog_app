@@ -6,6 +6,8 @@ import 'package:flutter_blog_app/core/utils/time_service.dart';
 import 'package:flutter_blog_app/features/auth/data/models/user/user_model.dart';
 
 abstract interface class IAuthRemoteDataSource {
+  User? get currentUserSession;
+
   Future<UserModel> signUpWithEmailPassword({
     required String name,
     required String email,
@@ -16,6 +18,8 @@ abstract interface class IAuthRemoteDataSource {
     required String email,
     required String password,
   });
+
+  Future<UserModel?> getCurrentUserData();
 }
 
 class AuthRemoteDataSource implements IAuthRemoteDataSource {
@@ -28,6 +32,9 @@ class AuthRemoteDataSource implements IAuthRemoteDataSource {
     this._firebaseFirestore,
     this._timeService,
   );
+
+  @override
+  User? get currentUserSession => _firebaseAuth.currentUser;
 
   @override
   Future<UserModel> loginWithEmailPassword({
@@ -52,7 +59,6 @@ class AuthRemoteDataSource implements IAuthRemoteDataSource {
         throw const ServerException("User Data Not Found !");
       }
       var userDataModel = UserModel.fromJson(userDetails.data()!);
-      print(userDataModel);
       return userDataModel;
     } on FirebaseAuthException catch (e) {
       throw ServerException("Firebase Error : ${e.toString()}");
@@ -94,6 +100,25 @@ class AuthRemoteDataSource implements IAuthRemoteDataSource {
       throw ServerException("Firebase Error : ${e.toString()}");
     } catch (e) {
       throw ServerException("Server Error: ${e.toString()}");
+    }
+  }
+
+  @override
+  Future<UserModel?> getCurrentUserData() async {
+    try {
+      final currentUserUid = currentUserSession?.uid;
+      if (currentUserUid != null) {
+        var userData = await _firebaseFirestore
+            .collection(UserConstants.userTableName)
+            .doc(currentUserUid)
+            .get();
+        if (userData.data() != null) {
+          return UserModel.fromJson(userData.data()!);
+        }
+      }
+      return null;
+    } catch (e) {
+      throw ServerException(e.toString());
     }
   }
 }

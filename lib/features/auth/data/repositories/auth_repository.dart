@@ -1,7 +1,7 @@
 import 'package:flutter_blog_app/core/error/exceptions.dart';
 import 'package:flutter_blog_app/core/error/failure.dart';
 import 'package:flutter_blog_app/features/auth/data/datasource/auth_remote_data_source.dart';
-import 'package:flutter_blog_app/features/auth/domain/entities/user_entity.dart';
+import 'package:flutter_blog_app/core/common/entities/user_entity.dart';
 import 'package:flutter_blog_app/features/auth/domain/repositories/i_auth_repository.dart';
 import 'package:fpdart/fpdart.dart';
 
@@ -9,6 +9,19 @@ class AuthRepository implements IAuthRepository {
   final IAuthRemoteDataSource _remoteDataSource;
 
   const AuthRepository(this._remoteDataSource);
+
+  @override
+  Future<Either<Failure, UserEntity>> currentUser() async {
+    try {
+      final user = await _remoteDataSource.getCurrentUserData();
+      if (user == null) {
+        return left(Failure("User not logged in !"));
+      }
+      return right(user);
+    } on ServerException catch (e) {
+      return left(Failure(e.message));
+    }
+  }
 
   @override
   Future<Either<Failure, UserEntity>> loginWithEmailPassword({
