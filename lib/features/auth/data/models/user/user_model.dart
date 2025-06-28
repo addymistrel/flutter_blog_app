@@ -1,4 +1,4 @@
-import 'package:flutter_blog_app/features/auth/domain/entities/user_entity.dart';
+import 'package:flutter_blog_app/core/common/entities/user_entity.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'user_model.g.dart';

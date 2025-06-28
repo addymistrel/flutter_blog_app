@@ -6,11 +6,15 @@ import 'package:flutter_blog_app/core/common/widgets/loader.dart';
 import 'package:flutter_blog_app/core/theme/app_pallete.dart';
 import 'package:flutter_blog_app/core/utils/show_snackbar.dart';
 import 'package:flutter_blog_app/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:flutter_blog_app/features/auth/presentation/pages/login_page.dart';
 import 'package:flutter_blog_app/features/auth/presentation/widgets/auth_field.dart';
 import 'package:flutter_blog_app/features/auth/presentation/widgets/auth_gradient_button.dart';
+import 'package:flutter_blog_app/routes/settings/page_routes.dart';
 import 'package:go_router/go_router.dart';
 
 class SignupPage extends StatefulWidget {
+  static route(BuildContext context) => context.push(SignUpPageRoute().path);
+
   const SignupPage({super.key});
 
   @override
@@ -98,9 +102,7 @@ class _SignupPageState extends State<SignupPage> {
                   ),
                   const SizedBox(height: 20),
                   GestureDetector(
-                    onTap: () {
-                      context.push("/login");
-                    },
+                    onTap: () => LoginPage.route(context),
                     child: RichText(
                       text: TextSpan(
                         text: "Already have an account? ",
