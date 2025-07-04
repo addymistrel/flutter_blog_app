@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 
 final class RouterFunctions {
   static get defaultRoute => LoginPageRoute().path;
-  static get authenticatedRoute => AddNewBlogPageRoute().path;
+  static get authenticatedRoute => BlogPageRoute().path;
 
   static List<GoRoute> getAllRoutes() {
     final List<PageRouteConfig> pageRoutes = [
@@ -12,6 +12,7 @@ final class RouterFunctions {
       LoginPageRoute(),
       SignUpPageRoute(),
       AddNewBlogPageRoute(),
+      BlogViewPageRoute(),
     ];
 
     return pageRoutes
@@ -19,7 +20,7 @@ final class RouterFunctions {
           (route) => GoRoute(
             path: route.path,
             name: route.name,
-            builder: (context, state) => route.page,
+            builder: (context, state) => route.buildPage(context, state),
           ),
         )
         .toList();

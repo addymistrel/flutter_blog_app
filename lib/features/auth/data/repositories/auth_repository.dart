@@ -1,5 +1,6 @@
 import 'package:flutter_blog_app/core/error/exceptions.dart';
 import 'package:flutter_blog_app/core/error/failure.dart';
+import 'package:flutter_blog_app/core/network/connection_checker.dart';
 import 'package:flutter_blog_app/features/auth/data/datasource/auth_remote_data_source.dart';
 import 'package:flutter_blog_app/core/common/entities/user_entity.dart';
 import 'package:flutter_blog_app/features/auth/domain/repositories/i_auth_repository.dart';
@@ -7,8 +8,9 @@ import 'package:fpdart/fpdart.dart';
 
 class AuthRepository implements IAuthRepository {
   final IAuthRemoteDataSource _remoteDataSource;
+  final IConnectionChecker _connectionChecker;
 
-  const AuthRepository(this._remoteDataSource);
+  const AuthRepository(this._remoteDataSource, this._connectionChecker);
 
   @override
   Future<Either<Failure, UserEntity>> currentUser() async {
@@ -55,8 +57,12 @@ class AuthRepository implements IAuthRepository {
     Future<UserEntity> Function() fn,
   ) async {
     try {
-      final user = await fn();
+      var isConnected = await _connectionChecker.isConnected;
+      if (!isConnected) {
+        return left(Failure("No Internet Connection !"));
+      }
 
+      final user = await fn();
       return right(user);
     } on ServerException catch (e) {
       return left(Failure(e.message));
