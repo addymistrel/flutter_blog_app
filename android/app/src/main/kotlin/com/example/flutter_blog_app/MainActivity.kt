@@ -1,5 +1,55 @@
 package com.example.flutter_blog_app
 
-import io.flutter.embedding.android.FlutterActivity
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.annotation.NonNull
+import androidx.biometric.BiometricManager
+import androidx.biometric.BiometricPrompt
+import androidx.core.content.ContextCompat
+import io.flutter.embedding.android.FlutterFragmentActivity
+import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.plugin.common.MethodChannel
+import java.util.concurrent.Executor
 
-class MainActivity : FlutterActivity()
+class MainActivity : FlutterFragmentActivity() {
+    private val CHANNEL = "com.example.biometric"
+
+    override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
+        super.configureFlutterEngine(flutterEngine)
+
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
+            if (call.method == "authenticate") {
+                showBiometricPrompt(result)
+            } else {
+                result.notImplemented()
+            }
+        }
+    }
+
+    private fun showBiometricPrompt(result: MethodChannel.Result) {
+        val executor: Executor = ContextCompat.getMainExecutor(this)
+
+        val biometricPrompt = BiometricPrompt(this, executor,
+            object : BiometricPrompt.AuthenticationCallback() {
+                override fun onAuthenticationSucceeded(authResult: BiometricPrompt.AuthenticationResult) {
+                    result.success(true)
+                }
+
+                override fun onAuthenticationFailed() {
+                    result.success(false)
+                }
+
+                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                    result.success(false)
+                }
+            })
+
+        val promptInfo = BiometricPrompt.PromptInfo.Builder()
+            .setTitle("Biometric Login")
+            .setSubtitle("Authenticate to access your blog")
+            .setNegativeButtonText("Cancel")
+            .build()
+
+        biometricPrompt.authenticate(promptInfo)
+    }
+}
